@@ -391,7 +391,7 @@
                 loadingDiv.textContent = "";
                 addMessage("Let me check your best options...");
                 try {
-                    const res = await fetch("https://uni-ai-app.onrender.com", {
+                    const res = await fetch("https://uni-ai-app.onrender.com/ai", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(userData)
