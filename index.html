@@ -3,141 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <title>Find Your Uni!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         /* ===================== GENERAL ===================== */
         body {
             margin: 0;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Press Start 2P', cursive;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f0f0f0;
+            background: #87ceeb;
+            background-image: url('https://img.freepik.com/free-vector/gradient-abstract-wireframe-background_23-2149009903.jpg?semt=ais_hybrid&w=740&q=80');
+            background-size: cover;
         }
 
-        /* ===================== AUTH BOX ===================== */
-        #auth-container {
-            width: 350px;
-            padding: 30px;
+        /* ===================== CONTAINERS ===================== */
+        #auth-container, #chat-container {
             background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border: 4px solid #000;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
+            font-size: 12px;
+            width: 400px;
         }
 
-            #auth-container input {
-                width: 100%;
-                padding: 12px;
-                border-radius: 15px;
-                border: 2px solid #ccc;
-                text-align: center;
-                font-size: 16px;
-            }
-
-            #auth-container button {
-                padding: 10px 25px;
-                border: none;
-                border-radius: 15px;
-                background-color: #ff6f61;
-                color: white;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background 0.3s;
-            }
-
-                #auth-container button:hover {
-                    background-color: #e55a4f;
-                }
-
-        /* ===================== CHAT BOX ===================== */
         #chat-container {
-            width: 450px;
-            max-height: 90vh;
-            background: #fff;
-            border-radius: 20px;
-            padding: 30px;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            max-height: 90vh;
             overflow-y: auto;
         }
 
+        /* ===================== HEADINGS ===================== */
         h1 {
+            font-size: 14px;
             text-align: center;
-            margin-bottom: 20px;
-            color: #333;
         }
 
+        /* ===================== INPUTS & BUTTONS ===================== */
+        input, button {
+            border: 3px solid #000;
+            font-family: 'Press Start 2P', cursive;
+            padding: 8px;
+            font-size: 10px;
+            text-align: center;
+            background: #fff;
+        }
+
+            button:hover {
+                background: #ffcc00;
+                cursor: pointer;
+            }
+
+        /* ===================== CHAT MESSAGES ===================== */
         .chat-message {
-            background: #e0e0e0;
-            color: #333;
-            border-radius: 15px;
-            padding: 10px 15px;
-            margin: 10px 0;
+            border: 2px solid #000;
+            background: #fff;
+            padding: 5px 10px;
+            margin: 5px 0;
             max-width: 100%;
-            text-align: left;
             align-self: flex-start;
         }
 
             .chat-message.user {
-                background: #ffefd5;
-                color: #333;
                 align-self: flex-end;
+                background: #ffeedd;
             }
 
-        input, button {
-            outline: none;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        #ecs-container {
+        /* ===================== ECS & INTEREST ===================== */
+        #ecs-container, #interest-buttons, #extra-info-container, #ec-fields {
             display: none;
             width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        #ec-fields, #extra-info-container, #interest-buttons {
-            display: none;
-            width: 100%;
-            margin-top: 10px;
         }
 
         .interest-button {
-            margin: 5px;
-            padding: 10px 20px;
-            border-radius: 15px;
-            border: none;
-            cursor: pointer;
-            background-color: #eee;
-            font-weight: bold;
-            transition: transform 0.2s, background 0.2s;
+            border: 3px solid #000;
+            padding: 5px;
+            margin: 2px;
+            font-size: 8px;
+            background: #fff;
         }
 
-            .interest-button:hover {
-                transform: scale(1.1);
-                background-color: #ddd;
-            }
-
+        /* ===================== LOADING ===================== */
         #loading {
-            margin-top: 10px;
-            font-weight: 600;
-            color: #333;
-            min-height: 24px;
+            min-height: 20px;
+            font-size: 8px;
         }
     </style>
 </head>
 <body>
 
+    <!-- ====== AUTH ====== -->
     <div id="auth-container">
         <input id="username" placeholder="Username">
         <input id="password" type="password" placeholder="Password">
@@ -145,8 +104,9 @@
         <button onclick="login()">Login</button>
     </div>
 
+    <!-- ====== CHAT ====== -->
     <div id="chat-container">
-        <h1>Find your uni!</h1>
+        <h1>Find Your Uni!</h1>
         <div id="chat-messages"></div>
         <input type="text" id="chat-input" placeholder="Enter your name...">
         <button id="chat-submit">Send</button>
@@ -174,27 +134,28 @@
     </div>
 
     <script>
-        let authContainer = document.getElementById("auth-container");
-        let chatContainer = document.getElementById("chat-container");
-        let chatMessages = document.getElementById("chat-messages");
-        let chatInput = document.getElementById("chat-input");
-        let chatSubmit = document.getElementById("chat-submit");
-        let loadingDiv = document.getElementById("loading");
+        // ====== ELEMENTS ======
+        const authContainer = document.getElementById("auth-container");
+        const chatContainer = document.getElementById("chat-container");
+        const chatMessages = document.getElementById("chat-messages");
+        const chatInput = document.getElementById("chat-input");
+        const chatSubmit = document.getElementById("chat-submit");
+        const loadingDiv = document.getElementById("loading");
 
-        let ecsContainer = document.getElementById("ecs-container");
-        let startECBtn = document.getElementById("start-ec");
-        let ecFields = document.getElementById("ec-fields");
-        let ecName = document.getElementById("ec-name");
-        let ecHours = document.getElementById("ec-hours");
-        let ecStart = document.getElementById("ec-start");
-        let ecEnd = document.getElementById("ec-end");
-        let addECBtn = document.getElementById("add-ec");
-        let submitECsBtn = document.getElementById("submit-ecs");
+        const ecsContainer = document.getElementById("ecs-container");
+        const startECBtn = document.getElementById("start-ec");
+        const ecFields = document.getElementById("ec-fields");
+        const ecName = document.getElementById("ec-name");
+        const ecHours = document.getElementById("ec-hours");
+        const ecStart = document.getElementById("ec-start");
+        const ecEnd = document.getElementById("ec-end");
+        const addECBtn = document.getElementById("add-ec");
+        const submitECsBtn = document.getElementById("submit-ecs");
 
-        let interestButtonsDiv = document.getElementById("interest-buttons");
-        let extraInfoContainer = document.getElementById("extra-info-container");
-        let extraInfoInput = document.getElementById("extra-info-input");
-        let submitExtraInfoBtn = document.getElementById("submit-extra-info");
+        const interestButtonsDiv = document.getElementById("interest-buttons");
+        const extraInfoContainer = document.getElementById("extra-info-container");
+        const extraInfoInput = document.getElementById("extra-info-input");
+        const submitExtraInfoBtn = document.getElementById("submit-extra-info");
 
         const interestOptions = ["Engineering", "Computer Science", "Health Sciences", "Business", "Arts", "Medicine", "Law", "Education"];
 
@@ -204,14 +165,11 @@
         let currentUser = localStorage.getItem("username");
 
         // auto-login
-        if (token && currentUser) {
-            authContainer.style.display = "none";
-            chatContainer.style.display = "flex";
-        }
+        if (token && currentUser) { authContainer.style.display = "none"; chatContainer.style.display = "flex"; }
 
-        // ================= CHAT =================
+        // ====== CHAT MESSAGE ======
         function addMessage(text, user = false) {
-            let div = document.createElement("div");
+            const div = document.createElement("div");
             div.textContent = text;
             div.className = "chat-message";
             if (user) div.classList.add("user");
@@ -219,7 +177,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // ================= HANDLE INPUT =================
+        // ====== CHAT FLOW ======
         chatSubmit.addEventListener("click", handleInput);
         chatInput.addEventListener("keypress", e => { if (e.key === "Enter") handleInput(); });
 
@@ -232,27 +190,26 @@
             if (step === 0) {
                 userData.name = value;
                 chatInput.placeholder = "Enter your percentage...";
-                step++;
-                addMessage(`Hi ${userData.name}! What's your percentage?`);
-                chatInput.type = "number";
+                setTimeout(() => { addMessage(`Hi ${userData.name}! What's your percentage?`); step++; chatInput.type = "number"; chatInput.focus(); }, 500);
             } else if (step === 1) {
                 userData.percentage = parseFloat(value);
                 if (isNaN(userData.percentage) || userData.percentage < 0 || userData.percentage > 100) {
                     addMessage("Please enter a valid percentage (0-100)."); return;
                 }
-                chatInput.style.display = "none"; chatSubmit.style.display = "none";
-                startECBtn.style.display = "block"; step++;
-                addMessage("Now, let's add your extracurriculars!");
+                setTimeout(() => {
+                    addMessage("Now, let's add your extracurriculars!");
+                    chatInput.style.display = "none"; chatSubmit.style.display = "none";
+                    startECBtn.style.display = "block"; step++;
+                }, 500);
             } else if (step === 3) {
                 userData.interest = value;
-                chatInput.style.display = "none"; chatSubmit.style.display = "none";
-                interestButtonsDiv.style.display = "none";
-                extraInfoContainer.style.display = "block"; extraInfoInput.focus();
-                step = 4;
+                addMessage(`Interest set to: ${value}`);
+                chatInput.style.display = "none"; chatSubmit.style.display = "none"; interestButtonsDiv.style.display = "none";
+                extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
             }
         }
 
-        // ================= ECS HANDLERS =================
+        // ====== ECS ======
         startECBtn.addEventListener("click", () => { startECBtn.style.display = "none"; ecFields.style.display = "block"; ecName.focus(); });
         addECBtn.addEventListener("click", addEC);
         [ecName, ecHours, ecStart, ecEnd].forEach(input => { input.addEventListener("keypress", e => { if (e.key === "Enter") addEC(); }) });
@@ -266,9 +223,13 @@
             userData.ecs.push(ec);
 
             let displayText = `${name} | ${hours} hrs`;
-            if (start && end) displayText += ` | ${start} to ${end}`; else if (start) displayText += ` | from ${start}`; else if (end) displayText += ` | until ${end}`;
-            let div = document.createElement("div"); div.textContent = displayText; div.style.padding = "5px"; div.style.borderBottom = "1px solid #ccc"; ecsContainer.appendChild(div);
-            ecsContainer.style.display = "block";
+            if (start && end) displayText += ` | ${start} to ${end}`;
+            else if (start) displayText += ` | from ${start}`;
+            else if (end) displayText += ` | until ${end}`;
+            const div = document.createElement("div"); div.textContent = displayText;
+            div.style.borderBottom = "1px solid #000"; div.style.padding = "2px";
+            ecsContainer.appendChild(div); ecsContainer.style.display = "block";
+
             ecName.value = ""; ecHours.value = ""; ecStart.value = ""; ecEnd.value = ""; ecName.focus();
         }
 
@@ -279,13 +240,13 @@
             const noBtn = document.createElement("button"); noBtn.textContent = "No"; noBtn.className = "interest-button";
 
             yesBtn.onclick = () => {
-                addMessage("Yes", true); interestButtonsDiv.style.display = "none"; chatInput.style.display = "block"; chatSubmit.style.display = "block"; chatInput.type = "text"; chatInput.placeholder = "Type your interest..."; chatInput.focus(); step = 3; yesBtn.remove(); noBtn.remove();
+                addMessage("Yes", true); interestButtonsDiv.style.display = "none"; chatInput.style.display = "block"; chatSubmit.style.display = "block";
+                chatInput.type = "text"; chatInput.placeholder = "Type your interest..."; chatInput.focus(); step = 3; yesBtn.remove(); noBtn.remove();
             };
-
             noBtn.onclick = () => {
                 addMessage("No", true); interestButtonsDiv.innerHTML = "";
                 interestOptions.forEach(interest => {
-                    let btn = document.createElement("button"); btn.textContent = interest; btn.className = "interest-button";
+                    const btn = document.createElement("button"); btn.textContent = interest; btn.className = "interest-button";
                     btn.onclick = () => {
                         userData.interest = interest; addMessage(interest, true); interestButtonsDiv.style.display = "none";
                         extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
@@ -294,11 +255,9 @@
                 });
                 interestButtonsDiv.style.display = "flex"; yesBtn.remove(); noBtn.remove();
             };
-
             interestButtonsDiv.innerHTML = ""; interestButtonsDiv.appendChild(yesBtn); interestButtonsDiv.appendChild(noBtn); interestButtonsDiv.style.display = "flex";
         });
 
-        // ================= EXTRA INFO =================
         submitExtraInfoBtn.addEventListener("click", () => {
             userData.extraInfo = extraInfoInput.value.trim();
             extraInfoContainer.style.display = "none";
@@ -306,7 +265,7 @@
         });
         extraInfoInput.addEventListener("keypress", e => { if (e.key === "Enter") submitExtraInfoBtn.click(); });
 
-        // ================= RESULTS =================
+        // ====== FETCH RESULTS ======
         async function showLoadingAndResults() {
             let i = 0; const loadingMessages = ["Finding your school...", "Checking eligibility...", "Crunching numbers...", "Calculating your destiny..."];
             loadingDiv.textContent = loadingMessages[i];
@@ -327,12 +286,15 @@
             }, 3000);
         }
 
-        // ================= SIGNUP / LOGIN =================
+        // ====== SIGNUP/LOGIN ======
         async function signup() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             try {
-                const res = await fetch("https://uni-ai-app.onrender.com/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+                const res = await fetch("https://uni-ai-app.onrender.com/signup", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
                 const data = await res.json();
                 if (data.error) alert("Signup failed: " + data.error);
                 else alert("Account created! Please login.");
@@ -343,14 +305,19 @@
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             try {
-                const res = await fetch("https://uni-ai-app.onrender.com/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+                const res = await fetch("https://uni-ai-app.onrender.com/login", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
                 const data = await res.json();
-                if (data.error) { alert("Login failed: " + data.error); }
+                if (data.error) alert("Login failed: " + data.error);
                 else {
                     token = data.token; currentUser = data.username;
-                    localStorage.setItem("token", token); localStorage.setItem("username", currentUser);
-                    authContainer.style.display = "none"; chatContainer.style.display = "flex";
-                    addMessage(`Welcome back, ${currentUser}!`);
+                    localStorage.setItem("token", token);
+                    localStorage.setItem("username", currentUser);
+                    authContainer.style.display = "none";
+                    chatContainer.style.display = "flex";
+                    addMessage(`Welcome ${currentUser}!`);
                 }
             } catch (err) { alert("Login failed!"); }
         }
