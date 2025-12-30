@@ -97,6 +97,16 @@
 <body>
 
     <!-- ====== AUTH ====== -->
+
+    <script>
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+
+    </script>
+
     <div id="auth-container">
         <input id="username" placeholder="Username">
         <input id="password" type="password" placeholder="Password">
@@ -107,6 +117,10 @@
     <!-- ====== CHAT ====== -->
     <div id="chat-container">
         <h1>Find Your Uni!</h1>
+        <button id="logoutBtn" onclick="logout()" style="align-self:flex-end;">
+            Logout
+        </button>
+
         <div id="chat-messages"></div>
         <input type="text" id="chat-input" placeholder="Enter your name...">
         <button id="chat-submit">Send</button>
@@ -164,8 +178,13 @@
         let token = localStorage.getItem("token");
         let currentUser = localStorage.getItem("username");
 
-        // auto-login
-        if (token && currentUser) { authContainer.style.display = "none"; chatContainer.style.display = "flex"; }
+        if (!token || !currentUser) {
+            authContainer.style.display = "flex";
+            chatContainer.style.display = "none";
+        } else {
+            authContainer.style.display = "none";
+            chatContainer.style.display = "flex";
+        }
 
         // ====== CHAT MESSAGE ======
         function addMessage(text, user = false) {
@@ -175,6 +194,31 @@
             if (user) div.classList.add("user");
             chatMessages.appendChild(div);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        let savedECs = JSON.parse(localStorage.getItem("ecs") || "[]");
+        let savedInterest = localStorage.getItem("interest");
+        let savedExtraInfo = localStorage.getItem("extraInfo");
+
+        if (token && currentUser) {
+            authContainer.style.display = "none";
+            chatContainer.style.display = "flex";
+
+            addMessage(getRandomWelcome());
+
+            // preload userData
+            userData.ecs = savedECs;
+            userData.interest = savedInterest;
+            userData.extraInfo = savedExtraInfo;
+
+            // show saved ECs visually
+            savedECs.forEach(ec => {
+                const div = document.createElement("div");
+                div.textContent = `${ec.name} | ${ec.hours} hrs`;
+                div.style.borderBottom = "1px solid #000";
+                ecsContainer.appendChild(div);
+            });
+
+            if (savedECs.length > 0) ecsContainer.style.display = "block";
         }
 
         // ====== CHAT FLOW ======
@@ -217,21 +261,45 @@
         function addEC() {
             const name = ecName.value.trim();
             const hours = parseFloat(ecHours.value);
-            const start = ecStart.value; const end = ecEnd.value;
+            const start = ecStart.value;
+            const end = ecEnd.value;
             if (!name || !hours) return;
-            const ec = { name, hours }; if (start) ec.start = start; if (end) ec.end = end;
+
+            const ec = { name, hours };
+            if (start) ec.start = start;
+            if (end) ec.end = end;
             userData.ecs.push(ec);
 
+            // display EC
+            const div = document.createElement("div");
             let displayText = `${name} | ${hours} hrs`;
             if (start && end) displayText += ` | ${start} to ${end}`;
             else if (start) displayText += ` | from ${start}`;
             else if (end) displayText += ` | until ${end}`;
-            const div = document.createElement("div"); div.textContent = displayText;
-            div.style.borderBottom = "1px solid #000"; div.style.padding = "2px";
-            ecsContainer.appendChild(div); ecsContainer.style.display = "block";
+            div.textContent = displayText;
+            div.style.borderBottom = "1px solid #000";
+            ecsContainer.appendChild(div);
+            ecsContainer.style.display = "block";
 
+            // clear fields
             ecName.value = ""; ecHours.value = ""; ecStart.value = ""; ecEnd.value = ""; ecName.focus();
+
+            // persist locally
+            localStorage.setItem("ecs", JSON.stringify(userData.ecs));
+
+            // persist to backend
+            if (token) {
+                fetch("https://uni-ai-app.onrender.com/user-data", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify({ ecs: userData.ecs })
+                });
+            }
         }
+
 
         submitECsBtn.addEventListener("click", () => {
             ecFields.style.display = "none";
@@ -248,9 +316,29 @@
                 interestOptions.forEach(interest => {
                     const btn = document.createElement("button"); btn.textContent = interest; btn.className = "interest-button";
                     btn.onclick = () => {
-                        userData.interest = interest; addMessage(interest, true); interestButtonsDiv.style.display = "none";
-                        extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
+                        userData.interest = interest;
+                        addMessage(interest, true);
+                        interestButtonsDiv.style.display = "none";
+                        extraInfoContainer.style.display = "block";
+                        extraInfoInput.focus();
+                        step = 4;
+
+                        // save interest locally
+                        localStorage.setItem("interest", interest);
+
+                        // save interest to backend
+                        if (token) {
+                            fetch("https://uni-ai-app.onrender.com/user-data", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": token
+                                },
+                                body: JSON.stringify({ interest })
+                            });
+                        }
                     };
+
                     interestButtonsDiv.appendChild(btn);
                 });
                 interestButtonsDiv.style.display = "flex"; yesBtn.remove(); noBtn.remove();
@@ -258,11 +346,32 @@
             interestButtonsDiv.innerHTML = ""; interestButtonsDiv.appendChild(yesBtn); interestButtonsDiv.appendChild(noBtn); interestButtonsDiv.style.display = "flex";
         });
 
-        submitExtraInfoBtn.addEventListener("click", () => {
+        submitExtraInfoBtn.addEventListener("click", async () => {
             userData.extraInfo = extraInfoInput.value.trim();
+
+            // save locally
+            localStorage.setItem("ecs", JSON.stringify(userData.ecs));
+            localStorage.setItem("interest", userData.interest || "");
+            localStorage.setItem("extraInfo", userData.extraInfo || "");
+
+            // save to backend
+            await fetch("https://uni-ai-app.onrender.com/user-data", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                },
+                body: JSON.stringify({
+                    ecs: userData.ecs,
+                    interest: userData.interest,
+                    extraInfo: userData.extraInfo
+                })
+            });
+
             extraInfoContainer.style.display = "none";
             showLoadingAndResults();
         });
+
         extraInfoInput.addEventListener("keypress", e => { if (e.key === "Enter") submitExtraInfoBtn.click(); });
 
         // ====== FETCH RESULTS ======
@@ -287,6 +396,7 @@
         }
 
         // ====== SIGNUP/LOGIN ======
+
         async function signup() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
@@ -312,12 +422,23 @@
                 const data = await res.json();
                 if (data.error) alert("Login failed: " + data.error);
                 else {
-                    token = data.token; currentUser = data.username;
+                    token = data.token;
+                    currentUser = data.username;
+
                     localStorage.setItem("token", token);
                     localStorage.setItem("username", currentUser);
+
+                    // SAVE USER DATA LOCALLY
+                    localStorage.setItem("ecs", JSON.stringify(data.ecs || []));
+                    localStorage.setItem("interest", data.interest || "");
+                    localStorage.setItem("extraInfo", data.extraInfo || "");
+
                     authContainer.style.display = "none";
                     chatContainer.style.display = "flex";
-                    addMessage(`Welcome ${currentUser}!`);
+
+                    addMessage(getRandomWelcome());
+                }
+
                 }
             } catch (err) { alert("Login failed!"); }
         }

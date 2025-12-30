@@ -6,6 +6,17 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Configuration, OpenAIApi } = require("openai");
+const welcomeBackMessages = [
+    "Welcome back 👋 Ready to plan your future?",
+    "Good to see you again! Let’s continue 🔍",
+    "Welcome back! Your journey continues 🚀",
+    "Back again? Let’s find your best uni 🎓",
+    "Welcome back, scholar 😎"
+];
+
+function getRandomWelcome() {
+    return welcomeBackMessages[Math.floor(Math.random() * welcomeBackMessages.length)];
+}
 
 require("dotenv").config();
 
@@ -134,6 +145,11 @@ Format your answer clearly with line breaks.
         console.error(err);
         res.status(500).json({ error: "AI request failed", details: err.message });
     }
+});
+// ===================== LOGOUT =====================
+app.post("/logout", auth, (req, res) => {
+    // JWT is stateless — nothing to destroy server-side
+    res.json({ message: "Logged out successfully" });
 });
 
 // ===================== START SERVER =====================
