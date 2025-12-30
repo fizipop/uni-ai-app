@@ -99,6 +99,18 @@
     <!-- ====== AUTH ====== -->
 
     <script>
+        const welcomeBackMessages = [
+            "Welcome back 👋 Ready to plan your future?",
+            "Good to see you again! Let’s continue 🔍",
+            "Welcome back! Your journey continues 🚀",
+            "Back again? Let’s find your best uni 🎓",
+            "Welcome back, scholar 😎"
+        ];
+
+        function getRandomWelcome() {
+            return welcomeBackMessages[Math.floor(Math.random() * welcomeBackMessages.length)];
+        }
+
         function logout() {
             localStorage.clear();
             location.reload();
@@ -397,12 +409,13 @@
 
         // ====== SIGNUP/LOGIN ======
 
-        async function signup() {
+        window.signup = async function () {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             try {
                 const res = await fetch("https://uni-ai-app.onrender.com/signup", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
@@ -411,12 +424,13 @@
             } catch (err) { alert("Signup failed!"); }
         }
 
-        async function login() {
+        window.login = async function () {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             try {
                 const res = await fetch("https://uni-ai-app.onrender.com/login", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
@@ -424,24 +438,19 @@
                 else {
                     token = data.token;
                     currentUser = data.username;
-
                     localStorage.setItem("token", token);
                     localStorage.setItem("username", currentUser);
-
-                    // SAVE USER DATA LOCALLY
                     localStorage.setItem("ecs", JSON.stringify(data.ecs || []));
                     localStorage.setItem("interest", data.interest || "");
                     localStorage.setItem("extraInfo", data.extraInfo || "");
 
                     authContainer.style.display = "none";
                     chatContainer.style.display = "flex";
-
                     addMessage(getRandomWelcome());
-                }
-
                 }
             } catch (err) { alert("Login failed!"); }
         }
+
     </script>
 </body>
 </html>
