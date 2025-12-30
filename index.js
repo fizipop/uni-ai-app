@@ -26,13 +26,6 @@ if (fs.existsSync(USERS_FILE)) {
 function saveUsers() {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
-
-// ===================== OPENAI SETUP =====================
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY
-});
-const openai = new OpenAIApi(configuration);
-
 // ===================== AUTH ROUTES =====================
 
 // SIGN UP
@@ -96,6 +89,12 @@ app.post("/user-data", auth, (req, res) => {
     res.json({ message: "User data updated" });
 });
 
+// ===================== OPENAI SETUP =====================
+const OpenAI = require("openai");
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
+
 // ===================== AI ENDPOINT =====================
 app.post("/ai", auth, async (req, res) => {
     const { percentage, interest, ecs = [] } = req.body;
@@ -123,13 +122,13 @@ Format your answer clearly with line breaks.
 `;
 
     try {
-        const completion = await openai.createChatCompletion({
+        const completion = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7
         });
 
-        const reply = completion.data.choices[0].message.content;
+        const reply = completion.choices[0].message.content;
         res.json({ reply });
     } catch (err) {
         console.error(err);
