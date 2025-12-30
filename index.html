@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Find your uni!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Find Your Uni!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -17,118 +17,142 @@
             overflow: auto;
         }
 
-        #chat-container {
-            width: 450px;
-            max-height: 90vh;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
+        /* AUTH */
+        #auth-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.8);
+            border: 4px solid #000;
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            gap: 12px;
+            box-shadow: 4px 4px 0 #333;
+            font-weight: bold;
+            font-family: 'Press Start 2P', cursive;
+            z-index: 100;
+        }
+
+        input, button {
+            font-family: 'Press Start 2P', cursive;
+            font-weight: bold;
+        }
+
+            input[type="text"], input[type="number"], input[type="date"], input[type="password"] {
+                width: 100%;
+                padding: 12px 15px;
+                border-radius: 8px;
+                border: 3px solid #000;
+                outline: none;
+                text-align: center;
+                background: #fff;
+                box-shadow: 2px 2px 0 #000;
+                transition: all 0.2s;
+            }
+
+            input:focus {
+                border-color: #ff6f61;
+                box-shadow: 3px 3px 0 #ff6f61;
+            }
+
+        button {
+            padding: 10px 25px;
+            border: 3px solid #000;
+            border-radius: 12px;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+            font-size: 12px;
+            box-shadow: 3px 3px 0 #000;
+            transition: all 0.2s;
+        }
+
+            button:hover {
+                transform: translate(-2px,-2px);
+                box-shadow: 5px 5px 0 #000;
+                background-color: #fffae3;
+            }
+
+            button:active {
+                transform: translate(1px,1px);
+                box-shadow: 2px 2px 0 #000;
+            }
+
+        /* CHAT */
+        #chat-container {
+            width: 500px;
+            max-height: 90vh;
+            background: rgba(255,255,255,0.9);
+            border: 5px solid #000;
+            border-radius: 15px;
+            padding: 25px;
+            display: none;
+            flex-direction: column;
             align-items: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.3);
             overflow-y: auto;
+            font-weight: bold;
         }
 
         h1 {
-            color: #fff;
+            color: #333;
             text-align: center;
             margin-bottom: 20px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 0 #fff;
         }
 
         .chat-message {
-            background: rgba(255,255,255,0.8);
+            background: #fff;
             color: #333;
-            border-radius: 20px;
+            border: 3px solid #000;
+            border-radius: 10px;
             padding: 10px 15px;
             margin: 10px 0;
             max-width: 100%;
             text-align: left;
             align-self: flex-start;
+            font-family: 'Press Start 2P', cursive;
+            box-shadow: 2px 2px 0 #000;
             animation: fadeIn 0.5s ease;
         }
 
             .chat-message.user {
-                background: rgba(255,255,255,0.2);
-                color: #fff;
+                background: #fffae3;
+                border-color: #ff6f61;
+                box-shadow: 2px 2px 0 #ff6f61;
                 align-self: flex-end;
             }
 
-        input[type="text"], input[type="number"], input[type="date"] {
+        #ecs-container, #interest-buttons, #extra-info-container {
             width: 100%;
-            padding: 12px 20px;
-            border-radius: 30px;
-            border: none;
             margin-top: 10px;
-            font-size: 16px;
-            outline: none;
-            text-align: center;
         }
 
-        button {
-            margin-top: 15px;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 30px;
-            background-color: #ff6f61;
-            color: white;
-            font-weight: 600;
+        .interest-button {
+            margin: 5px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 3px solid #000;
             cursor: pointer;
-            transition: background 0.3s;
+            background-color: #fff;
+            color: #333;
+            font-weight: bold;
+            box-shadow: 2px 2px 0 #000;
         }
 
-            button:hover {
-                background-color: #e55a4f;
+            .interest-button:hover {
+                transform: scale(1.1);
+                background-color: #fffae3;
             }
 
         #loading {
             margin-top: 10px;
             font-weight: 600;
-            color: #fff;
-            min-height: 24px;
-        }
-
-        .interest-button {
-            margin: 5px;
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            background-color: rgba(255,255,255,0.9);
             color: #333;
-            font-weight: bold;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-            .interest-button:hover {
-                transform: scale(1.1);
-                background-color: rgba(255,255,255,1);
-            }
-
-        #ecs-container {
-            display: none;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        #ec-fields, #extra-info-container {
-            display: none;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #interest-buttons {
-            display: none;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 10px;
+            min-height: 24px;
+            text-align: center;
         }
 
         @keyframes fadeIn {
@@ -165,17 +189,21 @@
     </style>
 </head>
 <body>
-    <div id="chat-container">
-        <h1>Find your uni!</h1>
-        <div id="chat-messages"></div>
+    <div id="auth-container">
+        <input id="username" placeholder="Username">
+        <input id="password" type="password" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+        <button onclick="login()">Login</button>
+    </div>
 
+    <div id="chat-container">
+        <h1>Find Your Uni!</h1>
+        <div id="chat-messages"></div>
         <input type="text" id="chat-input" placeholder="Enter your name...">
         <button id="chat-submit">Send</button>
 
         <div id="ecs-container"></div>
-        <button id="start-ec" style="display:none;">Add Extracurricular</button>
-
-        <div id="ec-fields">
+        <div id="ec-fields" style="display:none;">
             <input type="text" id="ec-name" placeholder="Activity name">
             <input type="number" id="ec-hours" placeholder="Hours">
             <input type="date" id="ec-start">
@@ -185,23 +213,22 @@
         </div>
 
         <div id="interest-buttons"></div>
-
         <div id="extra-info-container">
-            <input type="text" id="extra-info-input" placeholder="Any extra information (optional)">
+            <input type="text" id="extra-info-input" placeholder="Any extra info?">
             <button id="submit-extra-info">Submit Extra Info</button>
         </div>
-
         <div id="loading"></div>
     </div>
 
     <script>
+        const authContainer = document.getElementById("auth-container");
+        const chatContainer = document.getElementById("chat-container");
         const chatMessages = document.getElementById("chat-messages");
         const chatInput = document.getElementById("chat-input");
         const chatSubmit = document.getElementById("chat-submit");
         const loadingDiv = document.getElementById("loading");
 
         const ecsContainer = document.getElementById("ecs-container");
-        const startECBtn = document.getElementById("start-ec");
         const ecFields = document.getElementById("ec-fields");
         const ecName = document.getElementById("ec-name");
         const ecHours = document.getElementById("ec-hours");
@@ -211,7 +238,6 @@
         const submitECsBtn = document.getElementById("submit-ecs");
 
         const interestButtonsDiv = document.getElementById("interest-buttons");
-
         const extraInfoContainer = document.getElementById("extra-info-container");
         const extraInfoInput = document.getElementById("extra-info-input");
         const submitExtraInfoBtn = document.getElementById("submit-extra-info");
@@ -220,7 +246,13 @@
 
         let step = 0;
         let userData = { ecs: [] };
+        let token = localStorage.getItem("token");
+        let currentUser = localStorage.getItem("username");
 
+        // auto-login
+        if (token && currentUser) { authContainer.style.display = "none"; chatContainer.style.display = "flex"; addMessage(`Welcome back, ${currentUser}!`); }
+
+        // Messages
         function addMessage(text, user = false) {
             const div = document.createElement("div");
             div.textContent = text;
@@ -230,6 +262,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // Chat Input
         chatSubmit.addEventListener("click", handleInput);
         chatInput.addEventListener("keypress", e => { if (e.key === "Enter") handleInput(); });
 
@@ -239,182 +272,120 @@
             addMessage(value, true);
             chatInput.value = "";
 
-            if (step === 0) {
+            if (step === 0) { // Name
                 userData.name = value;
                 chatInput.placeholder = "Enter your percentage...";
-                setTimeout(() => {
-                    addMessage(`Hi ${userData.name}! What's your percentage?`);
-                    step++;
-                    chatInput.type = "number";
-                    chatInput.focus();
-                }, 500);
-            } else if (step === 1) {
+                chatInput.type = "number";
+                addMessage(`Hi ${value}! What's your percentage?`);
+                step++;
+            } else if (step === 1) { // Percentage
                 userData.percentage = parseFloat(value);
-                if (isNaN(userData.percentage) || userData.percentage < 0 || userData.percentage > 100) {
-                    addMessage("Please enter a valid percentage (0-100).");
-                    return;
-                }
-                setTimeout(() => {
-                    addMessage("Now, let's add your extracurriculars!");
-                    chatInput.style.display = "none";
-                    chatSubmit.style.display = "none";
-                    startECBtn.style.display = "block";
-                    step++;
-                }, 500);
-            } else if (step === 3) {
-                // For typing interest if user chose yes
+                if (isNaN(userData.percentage) || userData.percentage < 0 || userData.percentage > 100) { addMessage("Enter 0-100."); return; }
+                chatInput.style.display = "none"; chatSubmit.style.display = "none";
+                ecFields.style.display = "block"; addMessage("Add your extracurriculars (ECs)."); step++;
+            } else if (step === 3) { // Interest typed
                 userData.interest = value;
-                addMessage(`Interest set to: ${value}`);
-
-                chatInput.style.display = "none";      // hide input
-                chatSubmit.style.display = "none";     // hide submit button
-                interestButtonsDiv.style.display = "none";
-
-                extraInfoContainer.style.display = "block";
-                extraInfoInput.focus();
-                step = 4; // move to extra info step
+                chatInput.style.display = "none"; chatSubmit.style.display = "none";
+                interestButtonsDiv.style.display = "none"; extraInfoContainer.style.display = "block"; extraInfoInput.focus();
+                step = 4;
             }
-
         }
 
-        startECBtn.addEventListener("click", () => {
-            startECBtn.style.display = "none";
-            ecFields.style.display = "block";
-            ecName.focus();
-        });
-
-        function addEC() {
+        // ECs
+        addECBtn.addEventListener("click", () => {
             const name = ecName.value.trim();
             const hours = parseFloat(ecHours.value);
-            const start = ecStart.value;
-            const end = ecEnd.value;
-
-            // Make hours optional as well? If not, keep this check
-            if (!name || !hours) return; // Only require name and hours
-
-            const ec = { name, hours };
-
-            // Only add start/end if provided
-            if (start) ec.start = start;
-            if (end) ec.end = end;
-
+            const start = ecStart.value, end = ecEnd.value;
+            if (!name || !hours) return;
+            const ec = { name, hours }; if (start) ec.start = start; if (end) ec.end = end;
             userData.ecs.push(ec);
 
-            // Display
-            let displayText = `${name} | ${hours} hrs`;
-            if (start && end) displayText += ` | ${start} to ${end}`;
-            else if (start) displayText += ` | from ${start}`;
-            else if (end) displayText += ` | until ${end}`;
+            let text = `${name} | ${hours} hrs`;
+            if (start && end) text += ` | ${start} to ${end}`; else if (start) text += ` | from ${start}`; else if (end) text += ` | until ${end}`;
+            const div = document.createElement("div"); div.textContent = text; div.style.padding = "5px"; div.style.borderBottom = "1px solid #333";
+            ecsContainer.appendChild(div); ecsContainer.style.display = "block";
 
-            const div = document.createElement("div");
-            div.textContent = displayText;
-            div.style.padding = "5px";
-            div.style.borderBottom = "1px solid rgba(255,255,255,0.3)";
-            ecsContainer.appendChild(div);
-            ecsContainer.style.display = "block";
-
-            // Clear input fields
-            ecName.value = ""; ecHours.value = ""; ecStart.value = ""; ecEnd.value = "";
-            ecName.focus();
-        }
-
-
-        addECBtn.addEventListener("click", addEC);
-        [ecName, ecHours, ecStart, ecEnd].forEach(input => { input.addEventListener("keypress", e => { if (e.key === "Enter") addEC(); }); });
+            ecName.value = ""; ecHours.value = ""; ecStart.value = ""; ecEnd.value = ""; ecName.focus();
+        });
 
         submitECsBtn.addEventListener("click", () => {
             ecFields.style.display = "none";
             addMessage("Do you know your field of interest?");
-            const yesBtn = document.createElement("button");
-            yesBtn.textContent = "Yes"; yesBtn.className = "interest-button";
-            const noBtn = document.createElement("button");
-            noBtn.textContent = "No"; noBtn.className = "interest-button";
+            const yesBtn = document.createElement("button"); yesBtn.textContent = "Yes"; yesBtn.className = "interest-button";
+            const noBtn = document.createElement("button"); noBtn.textContent = "No"; noBtn.className = "interest-button";
 
-            yesBtn.onclick = () => {
-                addMessage("Yes", true);
-                interestButtonsDiv.style.display = "none";
-                chatInput.style.display = "block";
-                chatSubmit.style.display = "block";
-                chatInput.type = "text";
-                chatInput.placeholder = "Type your interest...";
-                chatInput.focus();
-                step = 3;
-                yesBtn.remove(); noBtn.remove();
-            };
-
+            yesBtn.onclick = () => { addMessage("Yes", true); chatInput.style.display = "block"; chatSubmit.style.display = "block"; chatInput.type = "text"; chatInput.placeholder = "Type your interest..."; step = 3; yesBtn.remove(); noBtn.remove(); }
             noBtn.onclick = () => {
                 addMessage("No", true);
                 interestButtonsDiv.innerHTML = "";
-                interestOptions.forEach(interest => {
-                    const btn = document.createElement("button");
-                    btn.textContent = interest;
-                    btn.className = "interest-button";
-                    btn.onclick = () => {
-                        userData.interest = interest;
-                        addMessage(interest, true);
-                        interestButtonsDiv.style.display = "none";
-                        extraInfoContainer.style.display = "block";
-                        extraInfoInput.focus();
-                        step = 4;
-                    };
-                    interestButtonsDiv.appendChild(btn);
+                interestOptions.forEach(opt => {
+                    const btn = document.createElement("button"); btn.textContent = opt; btn.className = "interest-button"; btn.onclick = () => {
+                        userData.interest = opt; addMessage(opt, true); interestButtonsDiv.style.display = "none"; extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
+                    }; interestButtonsDiv.appendChild(btn);
                 });
-                interestButtonsDiv.style.display = "flex";
-                yesBtn.remove(); noBtn.remove();
+                interestButtonsDiv.style.display = "flex"; yesBtn.remove(); noBtn.remove();
             };
 
-            interestButtonsDiv.innerHTML = "";
-            interestButtonsDiv.appendChild(yesBtn);
-            interestButtonsDiv.appendChild(noBtn);
-            interestButtonsDiv.style.display = "flex";
+            interestButtonsDiv.innerHTML = ""; interestButtonsDiv.appendChild(yesBtn); interestButtonsDiv.appendChild(noBtn); interestButtonsDiv.style.display = "flex";
         });
 
+        // Extra Info
         submitExtraInfoBtn.addEventListener("click", () => {
             userData.extraInfo = extraInfoInput.value.trim();
             extraInfoContainer.style.display = "none";
             showLoadingAndResults();
         });
-
         extraInfoInput.addEventListener("keypress", e => { if (e.key === "Enter") submitExtraInfoBtn.click(); });
 
-        function showLoadingAndResults() {
+        // Loading & AI request
+        async function showLoadingAndResults() {
             let i = 0;
-            const loadingMessages = ["Finding your school...", "Checking eligibility...", "Crunching numbers...", "Calculating your destiny..."];
-            loadingDiv.textContent = loadingMessages[i];
-            const interval = setInterval(() => {
-                i = (i + 1) % loadingMessages.length;
-                loadingDiv.textContent = loadingMessages[i];
-            }, 500);
+            const loadingMsgs = ["Finding your school...", "Checking eligibility...", "Crunching numbers...", "Calculating destiny..."];
+            loadingDiv.textContent = loadingMsgs[i];
+            const interval = setInterval(() => { i = (i + 1) % loadingMsgs.length; loadingDiv.textContent = loadingMsgs[i]; }, 500);
 
             setTimeout(async () => {
-                clearInterval(interval);
-                loadingDiv.textContent = "";
+                clearInterval(interval); loadingDiv.textContent = "";
                 addMessage("Let me check your best options...");
                 try {
-                    const res = await fetch("https://uni-ai-app.onrender.com/ai", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(userData)
-                    });
+                    const res = await fetch("https://uni-ai-app.onrender.com/ai", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": token }, body: JSON.stringify(userData) });
                     const data = await res.json();
                     addMessage(data.reply);
                     launchConfetti();
-                } catch (err) {
-                    addMessage("Oops! Something went wrong while fetching results.");
-                }
+                } catch (err) { addMessage("Oops! Something went wrong."); }
             }, 3000);
         }
 
-        function launchConfetti() {
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement("div");
-                confetti.className = "confetti";
-                confetti.style.left = Math.random() * window.innerWidth + "px";
-                confetti.style.backgroundColor = `hsl(${Math.random() * 360},100%,75%)`;
-                confetti.style.animationDuration = 2 + Math.random() * 3 + "s";
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 5000);
-            }
+        // Confetti
+        function launchConfetti() { for (let i = 0; i < 50; i++) { const c = document.createElement("div"); c.className = "confetti"; c.style.left = Math.random() * window.innerWidth + "px"; c.style.backgroundColor = `hsl(${Math.random() * 360},100%,75%)`; c.style.animationDuration = (2 + Math.random() * 3) + "s"; document.body.appendChild(c); setTimeout(() => c.remove(), 5000); } }
+
+        // SIGNUP / LOGIN
+        async function signup() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            try {
+                const res = await fetch("https://uni-ai-app.onrender.com/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (data.error) alert("Signup failed: " + data.error);
+                else alert("Account created! Please login.");
+            } catch (err) { alert("Signup failed!"); }
+        }
+
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            try {
+                const res = await fetch("https://uni-ai-app.onrender.com/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (data.error) alert("Login failed: " + data.error);
+                else {
+                    token = data.token; currentUser = data.username;
+                    localStorage.setItem("token", token);
+                    localStorage.setItem("username", currentUser);
+                    authContainer.style.display = "none"; chatContainer.style.display = "flex";
+                    addMessage(`Welcome ${currentUser}! Let's find your uni.`);
+                }
+            } catch (err) { alert("Login failed!"); }
         }
     </script>
 </body>

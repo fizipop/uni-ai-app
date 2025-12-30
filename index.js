@@ -1,52 +1,107 @@
-﻿const express = require("express");
+﻿// ===================== IMPORTS =====================
+const express = require("express");
+const fs = require("fs");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Example university data
+// ===================== CONFIG =====================
+const JWT_SECRET = "supersecretkey"; // later move to env variable
+const USERS_FILE = "users.json";
+
+// ===================== USER STORAGE =====================
+let users = [];
+if (fs.existsSync(USERS_FILE)) {
+    users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
+}
+
+function saveUsers() {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+// ===================== UNIVERSITIES =====================
 const universities = [
     { name: "UofT", minPercentage: 90, fields: ["Engineering", "Computer Science", "Arts", "Business"] },
-    { name: "Ryerson", minPercentage: 75, fields: ["Business", "Arts", "Engineering"] },
+    { name: "TMU", minPercentage: 75, fields: ["Business", "Arts", "Engineering"] },
     { name: "UOttawa", minPercentage: 70, fields: ["Law", "Health Sciences", "Education"] },
-    { name: "York University", minPercentage: 65, fields: ["Arts", "Business", "Health Sciences"] },
-    { name: "Seneca College", minPercentage: 60, fields: ["Arts", "Business", "Computer Science"] }
+    { name: "York", minPercentage: 65, fields: ["Arts", "Business", "Health Sciences"] },
+    { name: "Seneca", minPercentage: 60, fields: ["Arts", "Business", "Computer Science"] }
 ];
 
-app.post("/ai", (req, res) => {
+// ===================== AUTH ROUTES =====================
+
+// SIGN UP
+app.post("/signup", async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password)
+        return res.status(400).json({ error: "Missing fields" });
+
+    const exists = users.find(u => u.username === username);
+    if (exists)
+        return res.status(400).json({ error: "User already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ username, password: hashedPassword });
+    saveUsers();
+
+    res.json({ message: "Account created successfully" });
+});
+
+// LOGIN
+app.post("/login", async (req, res) => {
+    const { username, password } = req.body;
+
+    const user = users.find(u => u.username === username);
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "7d" });
+
+    res.json({ token, username });
+});
+
+// AUTH MIDDLEWARE
+function auth(req, res, next) {
+    const token = req.headers.authorization;
+    if (!token) return res.status(401).json({ error: "Not logged in" });
+
     try {
-        const userData = req.body;
-        const percentage = userData.percentage;
-        const interest = userData.interest ? userData.interest.toLowerCase() : "";
-        const ecsCount = userData.ecs ? userData.ecs.length : 0;
-
-        // Filter universities based on score and field
-        let possible = universities.filter(u =>
-            percentage >= u.minPercentage &&
-            (interest ? u.fields.map(f => f.toLowerCase()).includes(interest) : true)
-        );
-
-        let reply = `Hello ${userData.name}! `;
-        reply += `With ${percentage}% and ${ecsCount} extracurricular${ecsCount !== 1 ? "s" : ""}, `;
-
-        if (possible.length === 0) {
-            reply += `your options are limited due to your current score. Consider improving your grades or exploring colleges suited to your profile.`;
-        } else {
-            reply += `we recommend the following universities for your interests: `;
-            reply += possible.map(u => u.name).join(", ") + ".";
-        }
-
-        res.json({ reply });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ reply: "Something went wrong on the server." });
+        req.user = jwt.verify(token, JWT_SECRET);
+        next();
+    } catch {
+        res.status(401).json({ error: "Invalid token" });
     }
+}
+
+// ===================== AI ENDPOINT =====================
+app.post("/ai", auth, (req, res) => {
+    const { percentage, interest, ecs = [] } = req.body;
+
+    const possible = universities.filter(u =>
+        percentage >= u.minPercentage &&
+        (!interest || u.fields.map(f => f.toLowerCase()).includes(interest.toLowerCase()))
+    );
+
+    let reply = `Hey ${req.user.username}! With ${percentage}% and ${ecs.length} extracurriculars, `;
+
+    if (possible.length === 0) {
+        reply += "your options are limited, but college pathways could help.";
+    } else {
+        reply += "we recommend the following universities for your interests: ";
+        reply += possible.map(u => u.name).join(", ") + ".";
+    }
+
+    res.json({ reply });
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// ===================== START SERVER =====================
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log("Server running on port", PORT));

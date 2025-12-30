@@ -11,10 +11,15 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "googleapis": "^169.0.0",
+    "jsonwebtoken": "^9.0.3",
     "openai": "^6.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2"
   }
 }
