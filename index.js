@@ -5,13 +5,16 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { Configuration, OpenAIApi } = require("openai");
+
+require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
 // ===================== CONFIG =====================
-const JWT_SECRET = "supersecretkey"; // later move to env variable
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 const USERS_FILE = "users.json";
 
 // ===================== USER STORAGE =====================
@@ -24,14 +27,11 @@ function saveUsers() {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
-// ===================== UNIVERSITIES =====================
-const universities = [
-    { name: "UofT", minPercentage: 90, fields: ["Engineering", "Computer Science", "Arts", "Business"] },
-    { name: "TMU", minPercentage: 75, fields: ["Business", "Arts", "Engineering"] },
-    { name: "UOttawa", minPercentage: 70, fields: ["Law", "Health Sciences", "Education"] },
-    { name: "York", minPercentage: 65, fields: ["Arts", "Business", "Health Sciences"] },
-    { name: "Seneca", minPercentage: 60, fields: ["Arts", "Business", "Computer Science"] }
-];
+// ===================== OPENAI SETUP =====================
+const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY
+});
+const openai = new OpenAIApi(configuration);
 
 // ===================== AUTH ROUTES =====================
 
@@ -47,7 +47,7 @@ app.post("/signup", async (req, res) => {
         return res.status(400).json({ error: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, password: hashedPassword });
+    users.push({ username, password: hashedPassword, ecs: [], interest: null, extraInfo: "" });
     saveUsers();
 
     res.json({ message: "Account created successfully" });
@@ -65,10 +65,10 @@ app.post("/login", async (req, res) => {
 
     const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "7d" });
 
-    res.json({ token, username });
+    res.json({ token, username, ecs: user.ecs, interest: user.interest, extraInfo: user.extraInfo });
 });
 
-// AUTH MIDDLEWARE
+// ===================== AUTH MIDDLEWARE =====================
 function auth(req, res, next) {
     const token = req.headers.authorization;
     if (!token) return res.status(401).json({ error: "Not logged in" });
@@ -81,25 +81,60 @@ function auth(req, res, next) {
     }
 }
 
+// ===================== USER DATA UPDATE =====================
+app.post("/user-data", auth, (req, res) => {
+    const { ecs, interest, extraInfo } = req.body;
+
+    const user = users.find(u => u.username === req.user.username);
+    if (!user) return res.status(400).json({ error: "User not found" });
+
+    if (ecs) user.ecs = ecs;
+    if (interest) user.interest = interest;
+    if (extraInfo) user.extraInfo = extraInfo;
+
+    saveUsers();
+    res.json({ message: "User data updated" });
+});
+
 // ===================== AI ENDPOINT =====================
-app.post("/ai", auth, (req, res) => {
+app.post("/ai", auth, async (req, res) => {
     const { percentage, interest, ecs = [] } = req.body;
 
-    const possible = universities.filter(u =>
-        percentage >= u.minPercentage &&
-        (!interest || u.fields.map(f => f.toLowerCase()).includes(interest.toLowerCase()))
-    );
+    if (!percentage) return res.status(400).json({ error: "Percentage required" });
 
-    let reply = `Hey ${req.user.username}! With ${percentage}% and ${ecs.length} extracurriculars, `;
+    const ecsString = ecs.length > 0
+        ? ecs.map(e => `${e.name} (${e.hours} hrs)`).join(", ")
+        : "none";
 
-    if (possible.length === 0) {
-        reply += "your options are limited, but college pathways could help.";
-    } else {
-        reply += "we recommend the following universities for your interests: ";
-        reply += possible.map(u => u.name).join(", ") + ".";
+    const prompt = `
+You are an expert Canadian university guidance counselor.
+A student has:
+- Percentage: ${percentage}%
+- Field of interest: ${interest || "not specified"}
+- Extracurriculars: ${ecsString}
+
+Provide 3-5 Canadian universities the student is most likely eligible for.
+For each university, give:
+1. Name
+2. Short description (1-2 sentences)
+3. Why this university is a good fit (consider percentage, interest, and extracurriculars)
+Use real general admission thresholds and make recommendations realistic.
+Format your answer clearly with line breaks.
+`;
+
+    try {
+        const completion = await openai.createChatCompletion({
+            model: "gpt-4",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7
+        });
+
+        const reply = completion.data.choices[0].message.content;
+        res.json({ reply });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "AI request failed", details: err.message });
     }
-
-    res.json({ reply });
 });
 
 // ===================== START SERVER =====================
