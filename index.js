@@ -16,27 +16,33 @@ const universities = [
 ];
 
 app.post("/ai", (req, res) => {
-    const userData = req.body;
-    const percentage = userData.percentage;
-    const interest = userData.interest ? userData.interest.toLowerCase() : "";
+    try {
+        const userData = req.body;
+        const percentage = userData.percentage;
+        const interest = userData.interest ? userData.interest.toLowerCase() : "";
+        const ecsCount = userData.ecs ? userData.ecs.length : 0;
 
-    // Filter universities based on score and field
-    let possible = universities.filter(u =>
-        percentage >= u.minPercentage &&
-        (interest ? u.fields.map(f => f.toLowerCase()).includes(interest) : true)
-    );
+        // Filter universities based on score and field
+        let possible = universities.filter(u =>
+            percentage >= u.minPercentage &&
+            (interest ? u.fields.map(f => f.toLowerCase()).includes(interest) : true)
+        );
 
-    let reply = `Hello ${userData.name}! `;
-    reply += `With ${percentage}% and ${userData.ecs.length} extracurriculars, `;
+        let reply = `Hello ${userData.name}! `;
+        reply += `With ${percentage}% and ${ecsCount} extracurricular${ecsCount !== 1 ? "s" : ""}, `;
 
-    if (possible.length === 0) {
-        reply += `your options are limited due to your current score. Consider improving your grades or exploring colleges suited to your profile.`;
-    } else {
-        reply += `we recommend the following universities for your interests: `;
-        reply += possible.map(u => u.name).join(", ") + ".";
+        if (possible.length === 0) {
+            reply += `your options are limited due to your current score. Consider improving your grades or exploring colleges suited to your profile.`;
+        } else {
+            reply += `we recommend the following universities for your interests: `;
+            reply += possible.map(u => u.name).join(", ") + ".";
+        }
+
+        res.json({ reply });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ reply: "Something went wrong on the server." });
     }
-
-    res.json({ reply });
 });
 
 const PORT = process.env.PORT || 3000;
@@ -44,4 +50,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
