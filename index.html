@@ -5,17 +5,35 @@
     <title>Find Your Uni!</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        /* ===== BACKGROUND VIDEO ===== */
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Dark overlay for readability */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -1;
+        }
+
         /* ===================== GENERAL ===================== */
         body {
             margin: 0;
             font-family: 'Press Start 2P', cursive;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            background: #87ceeb;
-            background-image: url('https://img.freepik.com/free-vector/gradient-abstract-wireframe-background_23-2149009903.jpg?semt=ais_hybrid&w=740&q=80');
-            background-size: cover;
+            background: #000000;
         }
 
         /* ===================== CONTAINERS ===================== */
@@ -92,9 +110,37 @@
             min-height: 20px;
             font-size: 8px;
         }
+        #app {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
+    <!-- ===== AMBIENT AUDIO ===== -->
+    <audio id="fireplace-audio" loop muted>
+        <source src="fireplace.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="rain-audio" loop muted>
+        <source src="rain.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="jazz-audio" loop muted>
+        <source src="jazz.mp3" type="audio/mpeg">
+    </audio>
+
+
+    <!-- ===== BACKGROUND VIDEO ===== -->
+    <video id="bg-video" autoplay muted loop playsinline>
+        <source src="background.mp4" type="video/mp4">
+    </video>
+
+    <div id="bg-overlay"></div>
 
     <!-- ====== AUTH ====== -->
 
@@ -115,50 +161,73 @@
             localStorage.clear();
             location.reload();
         }
+        function startAmbientAudio() {
+            const fireplace = document.getElementById("fireplace-audio");
+            const rain = document.getElementById("rain-audio");
+            const jazz = document.getElementById("jazz-audio");
+
+            fireplace.muted = false;
+            rain.muted = false;
+            jazz.muted = false;
+
+            fireplace.volume = 0.20;
+            rain.volume = 0.050;
+            jazz.volume = 0.20;
+
+            fireplace.play();
+            rain.play();
+            jazz.play();
+
+            document.removeEventListener("click", startAmbientAudio);
+        }
+
+        // Browser requires user interaction
+        document.addEventListener("click", startAmbientAudio);
 
 
     </script>
+    <div id="app">
 
-    <div id="auth-container">
-        <input id="username" placeholder="Username">
-        <input id="password" type="password" placeholder="Password">
-        <button onclick="signup()">Sign Up</button>
-        <button onclick="login()">Login</button>
-    </div>
-
-    <!-- ====== CHAT ====== -->
-    <div id="chat-container">
-        <h1>Find Your Uni!</h1>
-        <button id="logoutBtn" onclick="logout()" style="align-self:flex-end;">
-            Logout
-        </button>
-
-        <div id="chat-messages"></div>
-        <input type="text" id="chat-input" placeholder="Enter your name...">
-        <button id="chat-submit">Send</button>
-
-        <div id="ecs-container"></div>
-        <button id="start-ec" style="display:none;">Add Extracurricular</button>
-
-        <div id="ec-fields">
-            <input type="text" id="ec-name" placeholder="Activity name">
-            <input type="number" id="ec-hours" placeholder="Hours">
-            <input type="date" id="ec-start">
-            <input type="date" id="ec-end">
-            <button id="add-ec">Add EC</button>
-            <button id="submit-ecs">Submit ECs</button>
+        <div id="auth-container">
+            <input id="username" placeholder="Username">
+            <input id="password" type="password" placeholder="Password">
+            <button onclick="signup()">Sign Up</button>
+            <button onclick="login()">Login</button>
         </div>
 
-        <div id="interest-buttons"></div>
+        <!-- ====== CHAT ====== -->
+        <div id="chat-container">
+            <h1>Find Your Uni!</h1>
+            <button id="logoutBtn" onclick="logout()" style="align-self:flex-end;">
+                Logout
+            </button>
 
-        <div id="extra-info-container">
-            <input type="text" id="extra-info-input" placeholder="Any extra information (optional)">
-            <button id="submit-extra-info">Submit Extra Info</button>
+            <div id="chat-messages"></div>
+            <input type="text" id="chat-input" placeholder="Enter your name...">
+            <button id="chat-submit">Send</button>
+
+            <div id="ecs-container"></div>
+            <button id="start-ec" style="display:none;">Add Extracurricular</button>
+
+            <div id="ec-fields">
+                <input type="text" id="ec-name" placeholder="Activity name">
+                <input type="number" id="ec-hours" placeholder="Hours">
+                <input type="date" id="ec-start">
+                <input type="date" id="ec-end">
+                <button id="add-ec">Add EC</button>
+                <button id="submit-ecs">Submit ECs</button>
+            </div>
+
+            <div id="interest-buttons"></div>
+
+            <div id="extra-info-container">
+                <input type="text" id="extra-info-input" placeholder="Any extra information (optional)">
+                <button id="submit-extra-info">Submit Extra Info</button>
+            </div>
+
+            <div id="loading"></div>
         </div>
-
-        <div id="loading"></div>
     </div>
-
     <script>
         // ====== ELEMENTS ======
         const authContainer = document.getElementById("auth-container");
