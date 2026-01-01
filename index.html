@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Find Your Uni!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
     <style>
         /* ===== BACKGROUND VIDEO ===== */
         #bg-video {
@@ -27,11 +28,41 @@
             background: rgba(0, 0, 0, 0.45);
             z-index: -1;
         }
+        #uni-results {
+            width: 100%;
+            text-align: center;
+        }
+
+        #gift-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .gift {
+            border: 3px solid #3e2c1c;
+            padding: 20px;
+            background: #fff8f0;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+            font-size: 22px;
+        }
+
+            .gift:hover {
+                transform: scale(1.05);
+                background: #f1e0c5;
+            }
+
+            .gift.opened {
+                font-size: 10px;
+                padding: 10px;
+            }
 
         /* ===================== GENERAL ===================== */
         body {
             margin: 0;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Patrick Hand', cursive;
             min-height: 100vh;
             background: #000000;
         }
@@ -63,21 +94,23 @@
 
         /* ===================== INPUTS & BUTTONS ===================== */
         input, button {
-            border: 3px solid #000;
-            font-family: 'Press Start 2P', cursive;
+            border: 2px solid #3e2c1c;
+            font-family: 'Patrick Hand', cursive;
             padding: 8px;
-            font-size: 10px;
+            font-size: 12px;
             text-align: center;
-            background: #fff;
+            background: #fff8f0;
         }
 
+          
             button:hover {
-                background: #ffcc00;
+                background: #f1e0c5;
                 cursor: pointer;
             }
 
         /* ===================== CHAT MESSAGES ===================== */
         .chat-message {
+            font-family: 'Patrick Hand', cursive; 
             border: 2px solid #000;
             background: #fff;
             padding: 5px 10px;
@@ -110,6 +143,7 @@
             min-height: 20px;
             font-size: 8px;
         }
+
         #app {
             position: relative;
             z-index: 2;
@@ -117,7 +151,6 @@
             justify-content: center;
             align-items: center;
         }
-
     </style>
 </head>
 <body>
@@ -226,6 +259,10 @@
             </div>
 
             <div id="loading"></div>
+            <div id="uni-results" style="display:none;">
+                <h2>Your Matches 🎁</h2>
+                <div id="gift-grid"></div>
+            </div>
         </div>
     </div>
     <script>
@@ -332,6 +369,29 @@
                 chatInput.style.display = "none"; chatSubmit.style.display = "none"; interestButtonsDiv.style.display = "none";
                 extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
             }
+        }
+        function displayUniversityGifts(universities) {
+            const resultsDiv = document.getElementById("uni-results");
+            const grid = document.getElementById("gift-grid");
+
+            grid.innerHTML = "";
+            resultsDiv.style.display = "block";
+
+            universities.forEach(uni => {
+                const gift = document.createElement("div");
+                gift.className = "gift";
+                gift.textContent = "🎁";
+
+                gift.onclick = () => {
+                    gift.classList.add("opened");
+                    gift.innerHTML = `
+                <strong>${uni.name}</strong><br><br>
+                ${uni.reason}
+            `;
+                };
+
+                grid.appendChild(gift);
+            });
         }
 
         // ====== ECS ======
@@ -457,6 +517,9 @@
 
         // ====== FETCH RESULTS ======
         async function showLoadingAndResults() {
+            chatInput.style.display = "none";
+            chatSubmit.style.display = "none";
+
             let i = 0; const loadingMessages = ["Finding your school...", "Checking eligibility...", "Crunching numbers...", "Calculating your destiny..."];
             loadingDiv.textContent = loadingMessages[i];
             const interval = setInterval(() => { i = (i + 1) % loadingMessages.length; loadingDiv.textContent = loadingMessages[i]; }, 500);
@@ -467,11 +530,30 @@
                 try {
                     const res = await fetch("https://uni-ai-app.onrender.com/ai", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json", "Authorization": token },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": token
+                        },
                         body: JSON.stringify(userData)
                     });
+
+                    if (!res.ok) {
+                        const errText = await res.text();
+                        console.error("AI ERROR:", res.status, errText);
+                        addMessage("Server error. Check console.");
+                        return;
+                    }
+
                     const data = await res.json();
-                    addMessage(data.reply);
+
+                    if (!data.universities || !Array.isArray(data.universities)) {
+                        console.error("Invalid AI response:", data);
+                        addMessage("AI returned invalid data.");
+                        return;
+                    }
+
+                    displayUniversityGifts(data.universities);
+
                 } catch (err) { addMessage("Oops! Something went wrong while fetching results."); }
             }, 3000);
         }

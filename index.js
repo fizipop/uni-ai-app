@@ -5,7 +5,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { Configuration, OpenAIApi } = require("openai");
 const welcomeBackMessages = [
     "Welcome back 👋 Ready to plan your future?",
     "Good to see you again! Let’s continue 🔍",
@@ -110,42 +109,81 @@ const openai = new OpenAI({
 app.post("/ai", auth, async (req, res) => {
     const { percentage, interest, ecs = [] } = req.body;
 
-    if (!percentage) return res.status(400).json({ error: "Percentage required" });
+    if (!percentage) {
+        return res.status(400).json({ error: "Percentage required" });
+    }
 
     const ecsString = ecs.length > 0
         ? ecs.map(e => `${e.name} (${e.hours} hrs)`).join(", ")
         : "none";
 
-    const prompt = `
-You are an expert Canadian university guidance counselor.
-A student has:
-- Percentage: ${percentage}%
-- Field of interest: ${interest || "not specified"}
-- Extracurriculars: ${ecsString}
-
-Provide 3-5 Canadian universities the student is most likely eligible for.
-For each university, give:
-1. Name
-2. Short description (1-2 sentences)
-3. Why this university is a good fit (consider percentage, interest, and extracurriculars)
-Use real general admission thresholds and make recommendations realistic.
-Format your answer clearly with line breaks.
-`;
-
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7
+            model: "gpt-3.5-turbo", // ✅ MORE STABLE FOR JSON
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a Canadian university admissions expert."
+                },
+                {
+                    role: "user",
+                    content: `
+Return ONLY valid JSON.
+Choose exactly 4 BEST-FIT Canadian universities.
+
+Student profile:
+- Percentage: ${percentage}%
+- Interest: ${interest || "Not specified"}
+- Extracurriculars: ${ecsString}
+
+Respond in this exact format:
+
+{
+  "universities": [
+    {
+      "name": "University Name",
+      "reason": "Short explanation (1–2 sentences)"
+    }
+  ]
+}
+
+No extra text.
+`
+                }
+            ],
+            response_format: { type: "json_object" }, // 🔥 CRITICAL
+            temperature: 0.4
         });
 
-        const reply = completion.choices[0].message.content;
-        res.json({ reply });
+        const raw = completion.choices[0].message.content;
+        console.log("RAW AI RESPONSE:", raw); // 👈 DEBUG SAFETY
+
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        } catch {
+            return res.status(500).json({
+                error: "AI returned malformed JSON"
+            });
+        }
+
+        if (!parsed.universities || parsed.universities.length !== 4) {
+            return res.status(500).json({
+                error: "AI returned invalid structure"
+            });
+        }
+
+        res.json(parsed);
+
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "AI request failed", details: err.message });
+        res.status(500).json({
+            error: "AI request failed",
+            details: err.message
+        });
     }
 });
+
 // ===================== LOGOUT =====================
 app.post("/logout", auth, (req, res) => {
     // JWT is stateless — nothing to destroy server-side
