@@ -246,32 +246,11 @@
     <script>
         // 🐱 CAT ELEMENTS
         document.addEventListener("DOMContentLoaded", () => {
-            const catIcon = document.getElementById("cat-icon");
-            const catChat = document.getElementById("cat-chat");
-            const catInput = document.getElementById("cat-input");
-            const catSend = document.getElementById("cat-send");
             const catMessages = document.getElementById("cat-messages");
 
-            // Hover mood switch
-            catIcon.addEventListener("mouseenter", () => {
-                catIcon.src = catIcon.dataset.hover;
-            });
-
-            catIcon.addEventListener("mouseleave", () => {
-                catIcon.src = catIcon.dataset.idle;
-            });
-
-            // Toggle chat
-            catIcon.addEventListener("click", () => {
-                catChat.style.display =
-                    catChat.style.display === "block" ? "none" : "block";
-            });
-
-            // Send message
-            catSend.addEventListener("click", sendCatMessage);
-            catInput.addEventListener("keypress", e => {
-                if (e.key === "Enter") sendCatMessage();
-            });
+            // Load previous messages from localStorage if any
+            const savedCatHistory = JSON.parse(localStorage.getItem("catChat") || "[]");
+            savedCatHistory.forEach(msg => addCatMessage(msg.sender, msg.text));
 
             async function sendCatMessage() {
                 const text = catInput.value.trim();
@@ -291,7 +270,12 @@
                     });
 
                     const data = await res.json();
-                    addCatMessage("🐱", data.answer || "Meow~ I’m thinking 🤔");
+                    addCatMessage("🐱", data.answer);
+
+                    // Save chat to localStorage
+                    savedCatHistory.push({ sender: "You", text });
+                    savedCatHistory.push({ sender: "🐱", text: data.answer });
+                    localStorage.setItem("catChat", JSON.stringify(savedCatHistory));
 
                 } catch {
                     addCatMessage("🐱", "Meow… something went wrong 😿");
@@ -306,6 +290,7 @@
                 catMessages.scrollTop = catMessages.scrollHeight;
             }
         });
+
 
         const welcomeBackMessages = [
             "Welcome back 👋 Ready to plan your future?",

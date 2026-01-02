@@ -2,6 +2,9 @@
 const express = require("express");
 const fs = require("fs");
 const cors = require("cors");
+// Store chat history per user (in memory for now)
+const catChatHistory = {}; // { username: [ {role, content}, ... ] }
+
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -106,38 +109,46 @@ const openai = new OpenAI({
 });
 app.post("/cat-ai", auth, async (req, res) => {
     const { question } = req.body;
-    if (!question) return res.json({ answer: "Ask me something 😸" });
+    const username = req.user.username;
+
+    // Initialize history if not present
+    if (!catChatHistory[username]) {
+        catChatHistory[username] = [
+            {
+                role: "system",
+                content: `
+You are a friendly Canadian university advisor cat 🐱. 
+ONLY answer questions related to Canadian universities, courses, admissions, grades, scholarships, or student life.
+Do NOT answer unrelated questions like personal hygiene, cooking, or politics.
+Keep answers short, clear, and helpful.
+            `
+            }
+        ];
+    }
+
+    // Add user's new question to history
+    catChatHistory[username].push({ role: "user", content: question });
 
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    role: "system",
-                    content: `
-You are a friendly, concise university admissions helper.
-Answer casually and clearly.
-No emojis spam. Be helpful.
-`
-                },
-                {
-                    role: "user",
-                    content: question
-                }
-            ],
+            model: "gpt-4",
+            messages: catChatHistory[username],
             temperature: 0.7
         });
 
-        res.json({
-            answer: completion.choices[0].message.content
-        });
+        const answer = completion.choices[0].message.content;
+
+        // Add AI's answer to history
+        catChatHistory[username].push({ role: "assistant", content: answer });
+
+        res.json({ answer });
 
     } catch (err) {
-        res.json({
-            answer: "I had trouble thinking 😿 Try again!"
-        });
+        console.error(err);
+        res.status(500).json({ error: "Cat AI failed" });
     }
 });
+
 
 // ===================== AI ENDPOINT =====================
 app.post("/ai", auth, async (req, res) => {
