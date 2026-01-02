@@ -104,6 +104,40 @@ const OpenAI = require("openai");
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
+app.post("/cat-ai", auth, async (req, res) => {
+    const { question } = req.body;
+    if (!question) return res.json({ answer: "Ask me something 😸" });
+
+    try {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "system",
+                    content: `
+You are a friendly, concise university admissions helper.
+Answer casually and clearly.
+No emojis spam. Be helpful.
+`
+                },
+                {
+                    role: "user",
+                    content: question
+                }
+            ],
+            temperature: 0.7
+        });
+
+        res.json({
+            answer: completion.choices[0].message.content
+        });
+
+    } catch (err) {
+        res.json({
+            answer: "I had trouble thinking 😿 Try again!"
+        });
+    }
+});
 
 // ===================== AI ENDPOINT =====================
 app.post("/ai", auth, async (req, res) => {

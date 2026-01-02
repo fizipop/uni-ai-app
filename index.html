@@ -6,6 +6,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
     <style>
+        /* 🐱 CAT ASSISTANT */
+        #cat-assistant {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        #cat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 70px;
+            cursor: pointer;
+            z-index: 9999;
+            transition: transform 0.2s ease;
+        }
+
+            #cat-icon:hover {
+                transform: translateY(-8px) scale(1.1) rotate(-3deg);
+            }
+
+
+        #cat-chat {
+            display: none;
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 260px;
+            background: #fff8f0;
+            border: 3px solid #3e2c1c;
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        #cat-messages {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .cat-msg {
+            margin-bottom: 4px;
+        }
+
+        #cat-input {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
         /* ===== BACKGROUND VIDEO ===== */
         #bg-video {
             position: fixed;
@@ -174,10 +226,87 @@
     </video>
 
     <div id="bg-overlay"></div>
+    <!-- 🐱 AI CAT ASSISTANT -->
+    <div id="cat-assistant">
+        <img id="cat-icon"
+             src="cat_idle.png"
+             data-idle="cat_idle.png"
+             data-hover="cat_hover.png"
+             alt="AI Cat" />
+
+        <div id="cat-chat">
+            <div id="cat-messages"></div>
+            <input id="cat-input" placeholder="Ask me anything about uni..." />
+            <button id="cat-send">Send</button>
+        </div>
+    </div>
 
     <!-- ====== AUTH ====== -->
 
     <script>
+        // 🐱 CAT ELEMENTS
+        document.addEventListener("DOMContentLoaded", () => {
+            const catIcon = document.getElementById("cat-icon");
+            const catChat = document.getElementById("cat-chat");
+            const catInput = document.getElementById("cat-input");
+            const catSend = document.getElementById("cat-send");
+            const catMessages = document.getElementById("cat-messages");
+
+            // Hover mood switch
+            catIcon.addEventListener("mouseenter", () => {
+                catIcon.src = catIcon.dataset.hover;
+            });
+
+            catIcon.addEventListener("mouseleave", () => {
+                catIcon.src = catIcon.dataset.idle;
+            });
+
+            // Toggle chat
+            catIcon.addEventListener("click", () => {
+                catChat.style.display =
+                    catChat.style.display === "block" ? "none" : "block";
+            });
+
+            // Send message
+            catSend.addEventListener("click", sendCatMessage);
+            catInput.addEventListener("keypress", e => {
+                if (e.key === "Enter") sendCatMessage();
+            });
+
+            async function sendCatMessage() {
+                const text = catInput.value.trim();
+                if (!text) return;
+
+                addCatMessage("You", text);
+                catInput.value = "";
+
+                try {
+                    const res = await fetch("https://uni-ai-app.onrender.com/cat-ai", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": localStorage.getItem("token")
+                        },
+                        body: JSON.stringify({ question: text })
+                    });
+
+                    const data = await res.json();
+                    addCatMessage("🐱", data.answer || "Meow~ I’m thinking 🤔");
+
+                } catch {
+                    addCatMessage("🐱", "Meow… something went wrong 😿");
+                }
+            }
+
+            function addCatMessage(sender, text) {
+                const div = document.createElement("div");
+                div.className = "cat-msg";
+                div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+                catMessages.appendChild(div);
+                catMessages.scrollTop = catMessages.scrollHeight;
+            }
+        });
+
         const welcomeBackMessages = [
             "Welcome back 👋 Ready to plan your future?",
             "Good to see you again! Let’s continue 🔍",
@@ -385,9 +514,9 @@
                 gift.onclick = () => {
                     gift.classList.add("opened");
                     gift.innerHTML = `
-                <strong>${uni.name}</strong><br><br>
-                ${uni.reason}
-            `;
+                    <strong>${uni.name}</strong><br><br>
+                    ${uni.reason}
+                `;
                 };
 
                 grid.appendChild(gift);
