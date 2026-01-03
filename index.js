@@ -174,7 +174,7 @@ app.post("/ai", auth, async (req, res) => {
                     role: "user",
                     content: `
 Return ONLY valid JSON.
-Choose exactly 4 BEST-FIT Canadian universities.
+Choose exactly 4 BEST-FIT Canadian universities consider students extracurriculars and percentage deeply and remember the competitiveness of university.
 
 Student profile:
 - Percentage: ${percentage}%
