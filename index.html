@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- redeploy -->
     <meta charset="UTF-8">
     <title>Find Your Uni!</title>
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -80,6 +81,7 @@
             background: rgba(0, 0, 0, 0.45);
             z-index: -1;
         }
+
         #uni-results {
             width: 100%;
             text-align: center;
@@ -154,7 +156,7 @@
             background: #fff8f0;
         }
 
-          
+
             button:hover {
                 background: #f1e0c5;
                 cursor: pointer;
@@ -162,7 +164,7 @@
 
         /* ===================== CHAT MESSAGES ===================== */
         .chat-message {
-            font-family: 'Patrick Hand', cursive; 
+            font-family: 'Patrick Hand', cursive;
             border: 2px solid #000;
             background: #fff;
             padding: 5px 10px;
@@ -246,6 +248,12 @@
     <script>
         // 🐱 CAT ELEMENTS
         document.addEventListener("DOMContentLoaded", () => {
+            const catInput = document.getElementById("cat-input");
+            const catSend = document.getElementById("cat-send");
+
+            catSend.addEventListener("click", sendCatMessage);
+            catInput.addEventListener("keypress", e => { if (e.key === "Enter") sendCatMessage(); });
+
             const catMessages = document.getElementById("cat-messages");
 
             // Load previous messages from localStorage if any
