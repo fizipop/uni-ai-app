@@ -246,98 +246,120 @@
     <!-- ====== AUTH ====== -->
 
     <script>
+      
         // 🐱 CAT ELEMENTS
+            const catIcon = document.getElementById("cat-icon");
+            const catChat = document.getElementById("cat-chat");
+
+        // Hover: switch cat image
+        catIcon.addEventListener("mouseenter", () => {
+                catIcon.src = catIcon.dataset.hover;
+        });
+
+        catIcon.addEventListener("mouseleave", () => {
+                catIcon.src = catIcon.dataset.idle;
+        });
+
+        // Click: toggle chat box
+        catIcon.addEventListener("click", () => {
+            if (catChat.style.display === "block") {
+                catChat.style.display = "none";
+            } else {
+                catChat.style.display = "block";
+            }
+        });
+
+        // Existing chat logic
         document.addEventListener("DOMContentLoaded", () => {
             const catInput = document.getElementById("cat-input");
             const catSend = document.getElementById("cat-send");
-
-            catSend.addEventListener("click", sendCatMessage);
-            catInput.addEventListener("keypress", e => { if (e.key === "Enter") sendCatMessage(); });
-
             const catMessages = document.getElementById("cat-messages");
 
             // Load previous messages from localStorage if any
             const savedCatHistory = JSON.parse(localStorage.getItem("catChat") || "[]");
             savedCatHistory.forEach(msg => addCatMessage(msg.sender, msg.text));
 
+            catSend.addEventListener("click", sendCatMessage);
+            catInput.addEventListener("keypress", e => { if (e.key === "Enter") sendCatMessage(); });
+
             async function sendCatMessage() {
                 const text = catInput.value.trim();
-                if (!text) return;
+            if (!text) return;
 
-                addCatMessage("You", text);
-                catInput.value = "";
+            addCatMessage("You", text);
+            catInput.value = "";
 
-                try {
+            try {
                     const res = await fetch("https://uni-ai-app.onrender.com/cat-ai", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": localStorage.getItem("token")
+                method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            "Authorization": localStorage.getItem("token")
                         },
-                        body: JSON.stringify({ question: text })
+            body: JSON.stringify({question: text })
                     });
 
-                    const data = await res.json();
-                    addCatMessage("🐱", data.answer);
+            const data = await res.json();
+            addCatMessage("🐱", data.answer);
 
-                    // Save chat to localStorage
-                    savedCatHistory.push({ sender: "You", text });
-                    savedCatHistory.push({ sender: "🐱", text: data.answer });
-                    localStorage.setItem("catChat", JSON.stringify(savedCatHistory));
-
+            // Save chat to localStorage
+            savedCatHistory.push({sender: "You", text });
+            savedCatHistory.push({sender: "🐱", text: data.answer });
+            localStorage.setItem("catChat", JSON.stringify(savedCatHistory));
                 } catch {
-                    addCatMessage("🐱", "Meow… something went wrong 😿");
+                addCatMessage("🐱", "Meow… something went wrong 😿");
                 }
             }
 
             function addCatMessage(sender, text) {
                 const div = document.createElement("div");
-                div.className = "cat-msg";
-                div.innerHTML = `<strong>${sender}:</strong> ${text}`;
-                catMessages.appendChild(div);
-                catMessages.scrollTop = catMessages.scrollHeight;
+            div.className = "cat-msg";
+            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            catMessages.appendChild(div);
+            catMessages.scrollTop = catMessages.scrollHeight;
             }
         });
+   
 
 
-        const welcomeBackMessages = [
-            "Welcome back 👋 Ready to plan your future?",
-            "Good to see you again! Let’s continue 🔍",
-            "Welcome back! Your journey continues 🚀",
-            "Back again? Let’s find your best uni 🎓",
-            "Welcome back, scholar 😎"
-        ];
+    const welcomeBackMessages = [
+    "Welcome back 👋 Ready to plan your future?",
+    "Good to see you again! Let’s continue 🔍",
+    "Welcome back! Your journey continues 🚀",
+    "Back again? Let’s find your best uni 🎓",
+    "Welcome back, scholar 😎"
+    ];
 
-        function getRandomWelcome() {
-            return welcomeBackMessages[Math.floor(Math.random() * welcomeBackMessages.length)];
-        }
+    function getRandomWelcome() {
+    return welcomeBackMessages[Math.floor(Math.random() * welcomeBackMessages.length)];
+    }
 
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
-        function startAmbientAudio() {
-            const fireplace = document.getElementById("fireplace-audio");
-            const rain = document.getElementById("rain-audio");
-            const jazz = document.getElementById("jazz-audio");
+    function logout() {
+    localStorage.clear();
+    location.reload();
+    }
+    function startAmbientAudio() {
+    const fireplace = document.getElementById("fireplace-audio");
+    const rain = document.getElementById("rain-audio");
+    const jazz = document.getElementById("jazz-audio");
 
-            fireplace.muted = false;
-            rain.muted = false;
-            jazz.muted = false;
+    fireplace.muted = false;
+    rain.muted = false;
+    jazz.muted = false;
 
-            fireplace.volume = 0.20;
-            rain.volume = 0.050;
-            jazz.volume = 0.20;
+    fireplace.volume = 0.20;
+    rain.volume = 0.050;
+    jazz.volume = 0.20;
 
-            fireplace.play();
-            rain.play();
-            jazz.play();
+    fireplace.play();
+    rain.play();
+    jazz.play();
 
-            document.removeEventListener("click", startAmbientAudio);
-        }
+    document.removeEventListener("click", startAmbientAudio);
+    }
 
-        // Browser requires user interaction
-        document.addEventListener("click", startAmbientAudio);
+    // Browser requires user interaction
+    document.addEventListener("click", startAmbientAudio);
 
 
     </script>
@@ -414,26 +436,26 @@
         const interestOptions = ["Engineering", "Computer Science", "Health Sciences", "Business", "Arts", "Medicine", "Law", "Education"];
 
         let step = 0;
-        let userData = { ecs: [] };
+        let userData = {ecs: [] };
         let token = localStorage.getItem("token");
         let currentUser = localStorage.getItem("username");
 
         if (!token || !currentUser) {
             authContainer.style.display = "flex";
-            chatContainer.style.display = "none";
+        chatContainer.style.display = "none";
         } else {
             authContainer.style.display = "none";
-            chatContainer.style.display = "flex";
+        chatContainer.style.display = "flex";
         }
 
         // ====== CHAT MESSAGE ======
         function addMessage(text, user = false) {
             const div = document.createElement("div");
-            div.textContent = text;
-            div.className = "chat-message";
-            if (user) div.classList.add("user");
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+        div.textContent = text;
+        div.className = "chat-message";
+        if (user) div.classList.add("user");
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         let savedECs = JSON.parse(localStorage.getItem("ecs") || "[]");
         let savedInterest = localStorage.getItem("interest");
@@ -441,21 +463,21 @@
 
         if (token && currentUser) {
             authContainer.style.display = "none";
-            chatContainer.style.display = "flex";
+        chatContainer.style.display = "flex";
 
-            addMessage(getRandomWelcome());
+        addMessage(getRandomWelcome());
 
-            // preload userData
-            userData.ecs = savedECs;
-            userData.interest = savedInterest;
-            userData.extraInfo = savedExtraInfo;
+        // preload userData
+        userData.ecs = savedECs;
+        userData.interest = savedInterest;
+        userData.extraInfo = savedExtraInfo;
 
             // show saved ECs visually
             savedECs.forEach(ec => {
                 const div = document.createElement("div");
-                div.textContent = `${ec.name} | ${ec.hours} hrs`;
-                div.style.borderBottom = "1px solid #000";
-                ecsContainer.appendChild(div);
+        div.textContent = `${ec.name} | ${ec.hours} hrs`;
+        div.style.borderBottom = "1px solid #000";
+        ecsContainer.appendChild(div);
             });
 
             if (savedECs.length > 0) ecsContainer.style.display = "block";
@@ -467,68 +489,68 @@
 
         function handleInput() {
             const value = chatInput.value.trim();
-            if (!value) return;
-            addMessage(value, true);
-            chatInput.value = "";
+        if (!value) return;
+        addMessage(value, true);
+        chatInput.value = "";
 
-            if (step === 0) {
-                userData.name = value;
-                chatInput.placeholder = "Enter your percentage...";
-                setTimeout(() => { addMessage(`Hi ${userData.name}! What's your percentage?`); step++; chatInput.type = "number"; chatInput.focus(); }, 500);
+        if (step === 0) {
+            userData.name = value;
+        chatInput.placeholder = "Enter your percentage...";
+                setTimeout(() => {addMessage(`Hi ${userData.name}! What's your percentage?`); step++; chatInput.type = "number"; chatInput.focus(); }, 500);
             } else if (step === 1) {
-                userData.percentage = parseFloat(value);
-                if (isNaN(userData.percentage) || userData.percentage < 0 || userData.percentage > 100) {
-                    addMessage("Please enter a valid percentage (0-100)."); return;
+            userData.percentage = parseFloat(value);
+        if (isNaN(userData.percentage) || userData.percentage < 0 || userData.percentage > 100) {
+            addMessage("Please enter a valid percentage (0-100)."); return;
                 }
                 setTimeout(() => {
-                    addMessage("Now, let's add your extracurriculars!");
-                    chatInput.style.display = "none"; chatSubmit.style.display = "none";
-                    startECBtn.style.display = "block"; step++;
+            addMessage("Now, let's add your extracurriculars!");
+        chatInput.style.display = "none"; chatSubmit.style.display = "none";
+        startECBtn.style.display = "block"; step++;
                 }, 500);
             } else if (step === 3) {
-                userData.interest = value;
-                addMessage(`Interest set to: ${value}`);
-                chatInput.style.display = "none"; chatSubmit.style.display = "none"; interestButtonsDiv.style.display = "none";
-                extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
+            userData.interest = value;
+        addMessage(`Interest set to: ${value}`);
+        chatInput.style.display = "none"; chatSubmit.style.display = "none"; interestButtonsDiv.style.display = "none";
+        extraInfoContainer.style.display = "block"; extraInfoInput.focus(); step = 4;
             }
         }
         function displayUniversityGifts(universities) {
             const resultsDiv = document.getElementById("uni-results");
-            const grid = document.getElementById("gift-grid");
+        const grid = document.getElementById("gift-grid");
 
-            grid.innerHTML = "";
-            resultsDiv.style.display = "block";
+        grid.innerHTML = "";
+        resultsDiv.style.display = "block";
 
             universities.forEach(uni => {
                 const gift = document.createElement("div");
-                gift.className = "gift";
-                gift.textContent = "🎁";
+        gift.className = "gift";
+        gift.textContent = "🎁";
 
                 gift.onclick = () => {
-                    gift.classList.add("opened");
-                    gift.innerHTML = `
-                    <strong>${uni.name}</strong><br><br>
-                    ${uni.reason}
-                `;
+            gift.classList.add("opened");
+        gift.innerHTML = `
+        <strong>${uni.name}</strong><br><br>
+            ${uni.reason}
+            `;
                 };
 
-                grid.appendChild(gift);
+            grid.appendChild(gift);
             });
         }
 
         // ====== ECS ======
-        startECBtn.addEventListener("click", () => { startECBtn.style.display = "none"; ecFields.style.display = "block"; ecName.focus(); });
-        addECBtn.addEventListener("click", addEC);
-        [ecName, ecHours, ecStart, ecEnd].forEach(input => { input.addEventListener("keypress", e => { if (e.key === "Enter") addEC(); }) });
+        startECBtn.addEventListener("click", () => {startECBtn.style.display = "none"; ecFields.style.display = "block"; ecName.focus(); });
+            addECBtn.addEventListener("click", addEC);
+        [ecName, ecHours, ecStart, ecEnd].forEach(input => {input.addEventListener("keypress", e => { if (e.key === "Enter") addEC(); })});
 
-        function addEC() {
+            function addEC() {
             const name = ecName.value.trim();
             const hours = parseFloat(ecHours.value);
             const start = ecStart.value;
             const end = ecEnd.value;
             if (!name || !hours) return;
 
-            const ec = { name, hours };
+            const ec = {name, hours};
             if (start) ec.start = start;
             if (end) ec.end = end;
             userData.ecs.push(ec);
@@ -565,52 +587,52 @@
 
 
         submitECsBtn.addEventListener("click", () => {
-            ecFields.style.display = "none";
+                ecFields.style.display = "none";
             addMessage("Do you know your field of interest?");
             const yesBtn = document.createElement("button"); yesBtn.textContent = "Yes"; yesBtn.className = "interest-button";
             const noBtn = document.createElement("button"); noBtn.textContent = "No"; noBtn.className = "interest-button";
 
             yesBtn.onclick = () => {
                 addMessage("Yes", true); interestButtonsDiv.style.display = "none"; chatInput.style.display = "block"; chatSubmit.style.display = "block";
-                chatInput.type = "text"; chatInput.placeholder = "Type your interest..."; chatInput.focus(); step = 3; yesBtn.remove(); noBtn.remove();
+            chatInput.type = "text"; chatInput.placeholder = "Type your interest..."; chatInput.focus(); step = 3; yesBtn.remove(); noBtn.remove();
             };
             noBtn.onclick = () => {
                 addMessage("No", true); interestButtonsDiv.innerHTML = "";
                 interestOptions.forEach(interest => {
                     const btn = document.createElement("button"); btn.textContent = interest; btn.className = "interest-button";
                     btn.onclick = () => {
-                        userData.interest = interest;
-                        addMessage(interest, true);
-                        interestButtonsDiv.style.display = "none";
-                        extraInfoContainer.style.display = "block";
-                        extraInfoInput.focus();
-                        step = 4;
+                userData.interest = interest;
+            addMessage(interest, true);
+            interestButtonsDiv.style.display = "none";
+            extraInfoContainer.style.display = "block";
+            extraInfoInput.focus();
+            step = 4;
 
-                        // save interest locally
-                        localStorage.setItem("interest", interest);
+            // save interest locally
+            localStorage.setItem("interest", interest);
 
-                        // save interest to backend
-                        if (token) {
-                            fetch("https://uni-ai-app.onrender.com/user-data", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Authorization": token
-                                },
-                                body: JSON.stringify({ interest })
-                            });
+            // save interest to backend
+            if (token) {
+                fetch("https://uni-ai-app.onrender.com/user-data", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify({ interest })
+                });
                         }
                     };
 
-                    interestButtonsDiv.appendChild(btn);
+            interestButtonsDiv.appendChild(btn);
                 });
-                interestButtonsDiv.style.display = "flex"; yesBtn.remove(); noBtn.remove();
+            interestButtonsDiv.style.display = "flex"; yesBtn.remove(); noBtn.remove();
             };
             interestButtonsDiv.innerHTML = ""; interestButtonsDiv.appendChild(yesBtn); interestButtonsDiv.appendChild(noBtn); interestButtonsDiv.style.display = "flex";
         });
 
         submitExtraInfoBtn.addEventListener("click", async () => {
-            userData.extraInfo = extraInfoInput.value.trim();
+                userData.extraInfo = extraInfoInput.value.trim();
 
             // save locally
             localStorage.setItem("ecs", JSON.stringify(userData.ecs));
@@ -620,14 +642,14 @@
             // save to backend
             await fetch("https://uni-ai-app.onrender.com/user-data", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": token
+            headers: {
+                "Content-Type": "application/json",
+            "Authorization": token
                 },
-                body: JSON.stringify({
-                    ecs: userData.ecs,
-                    interest: userData.interest,
-                    extraInfo: userData.extraInfo
+            body: JSON.stringify({
+                ecs: userData.ecs,
+            interest: userData.interest,
+            extraInfo: userData.extraInfo
                 })
             });
 
@@ -637,91 +659,91 @@
 
         extraInfoInput.addEventListener("keypress", e => { if (e.key === "Enter") submitExtraInfoBtn.click(); });
 
-        // ====== FETCH RESULTS ======
-        async function showLoadingAndResults() {
-            chatInput.style.display = "none";
+            // ====== FETCH RESULTS ======
+            async function showLoadingAndResults() {
+                chatInput.style.display = "none";
             chatSubmit.style.display = "none";
 
             let i = 0; const loadingMessages = ["Finding your school...", "Checking eligibility...", "Crunching numbers...", "Calculating your destiny..."];
             loadingDiv.textContent = loadingMessages[i];
-            const interval = setInterval(() => { i = (i + 1) % loadingMessages.length; loadingDiv.textContent = loadingMessages[i]; }, 500);
+            const interval = setInterval(() => {i = (i + 1) % loadingMessages.length; loadingDiv.textContent = loadingMessages[i]; }, 500);
 
             setTimeout(async () => {
                 clearInterval(interval); loadingDiv.textContent = "";
-                addMessage("Let me check your best options...");
-                try {
+            addMessage("Let me check your best options...");
+            try {
                     const res = await fetch("https://uni-ai-app.onrender.com/ai", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": token
+                method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            "Authorization": token
                         },
-                        body: JSON.stringify(userData)
+            body: JSON.stringify(userData)
                     });
 
-                    if (!res.ok) {
+            if (!res.ok) {
                         const errText = await res.text();
-                        console.error("AI ERROR:", res.status, errText);
-                        addMessage("Server error. Check console.");
-                        return;
+            console.error("AI ERROR:", res.status, errText);
+            addMessage("Server error. Check console.");
+            return;
                     }
 
-                    const data = await res.json();
+            const data = await res.json();
 
-                    if (!data.universities || !Array.isArray(data.universities)) {
-                        console.error("Invalid AI response:", data);
-                        addMessage("AI returned invalid data.");
-                        return;
+            if (!data.universities || !Array.isArray(data.universities)) {
+                console.error("Invalid AI response:", data);
+            addMessage("AI returned invalid data.");
+            return;
                     }
 
-                    displayUniversityGifts(data.universities);
+            displayUniversityGifts(data.universities);
 
-                } catch (err) { addMessage("Oops! Something went wrong while fetching results."); }
+                } catch (err) {addMessage("Oops! Something went wrong while fetching results."); }
             }, 3000);
         }
 
-        // ====== SIGNUP/LOGIN ======
+            // ====== SIGNUP/LOGIN ======
 
-        window.signup = async function () {
+            window.signup = async function () {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             try {
                 const res = await fetch("https://uni-ai-app.onrender.com/signup", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
+                method: "POST",
+            headers: {"Content-Type": "application/json" },
+            body: JSON.stringify({username, password})
                 });
-                const data = await res.json();
-                if (data.error) alert("Signup failed: " + data.error);
-                else alert("Account created! Please login.");
-            } catch (err) { alert("Signup failed!"); }
+            const data = await res.json();
+            if (data.error) alert("Signup failed: " + data.error);
+            else alert("Account created! Please login.");
+            } catch (err) {alert("Signup failed!"); }
         }
 
-        window.login = async function () {
+            window.login = async function () {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             try {
                 const res = await fetch("https://uni-ai-app.onrender.com/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
+                method: "POST",
+            headers: {"Content-Type": "application/json" },
+            body: JSON.stringify({username, password})
                 });
-                const data = await res.json();
-                if (data.error) alert("Login failed: " + data.error);
-                else {
-                    token = data.token;
-                    currentUser = data.username;
-                    localStorage.setItem("token", token);
-                    localStorage.setItem("username", currentUser);
-                    localStorage.setItem("ecs", JSON.stringify(data.ecs || []));
-                    localStorage.setItem("interest", data.interest || "");
-                    localStorage.setItem("extraInfo", data.extraInfo || "");
+            const data = await res.json();
+            if (data.error) alert("Login failed: " + data.error);
+            else {
+                token = data.token;
+            currentUser = data.username;
+            localStorage.setItem("token", token);
+            localStorage.setItem("username", currentUser);
+            localStorage.setItem("ecs", JSON.stringify(data.ecs || []));
+            localStorage.setItem("interest", data.interest || "");
+            localStorage.setItem("extraInfo", data.extraInfo || "");
 
-                    authContainer.style.display = "none";
-                    chatContainer.style.display = "flex";
-                    addMessage(getRandomWelcome());
+            authContainer.style.display = "none";
+            chatContainer.style.display = "flex";
+            addMessage(getRandomWelcome());
                 }
-            } catch (err) { alert("Login failed!"); }
+            } catch (err) {alert("Login failed!"); }
         }
 
     </script>
